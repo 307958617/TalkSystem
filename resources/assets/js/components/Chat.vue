@@ -16,32 +16,17 @@
         <!-- /.box-header -->
         <div class="box-body">
             <!-- Conversations are loaded here -->
-            <div class="direct-chat-messages">
+            <div class="direct-chat-messages" id="messages">
                 <!-- Message. Default to the left -->
-                <div class="direct-chat-msg">
+                <div class="direct-chat-msg" :class="[Luser.id == message.user_id ? 'right' :'']" v-for="message in messages">
                     <div class="direct-chat-info clearfix">
-                        <span class="direct-chat-name pull-left">Alexander Pierce</span>
-                        <span class="direct-chat-timestamp pull-right">23 Jan 2:00 pm</span>
+                        <span class="direct-chat-name pull-left">{{ message.user.name }}</span>
+                        <span class="direct-chat-timestamp pull-right">{{ message.created_at }}</span>
                     </div>
                     <!-- /.direct-chat-info -->
-                    <img class="direct-chat-img" src="dist/img/user1-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
+                    <img class="direct-chat-img" :src="message.user.avatar" alt="message user image"><!-- /.direct-chat-img -->
                     <div class="direct-chat-text">
-                        Is this template really for free? That's unbelievable!
-                      </div>
-                    <!-- /.direct-chat-text -->
-                </div>
-                <!-- /.direct-chat-msg -->
-
-                <!-- Message to the right -->
-                <div class="direct-chat-msg right">
-                    <div class="direct-chat-info clearfix">
-                        <span class="direct-chat-name pull-right">Sarah Bullock</span>
-                        <span class="direct-chat-timestamp pull-left">23 Jan 2:05 pm</span>
-                    </div>
-                    <!-- /.direct-chat-info -->
-                    <img class="direct-chat-img" src="dist/img/user3-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-                    <div class="direct-chat-text">
-                        You better believe it!
+                        {{ message.message }}
                       </div>
                     <!-- /.direct-chat-text -->
                 </div>
@@ -89,11 +74,11 @@
         </div>
         <!-- /.box-body -->
         <div class="box-footer">
-            <form action="#" method="post">
+            <form @submit.prevent="sendMessage">
                 <div class="input-group">
-                    <input type="text" name="message" placeholder="Type Message ..." class="form-control">
+                    <input v-model="content" type="text" name="message" placeholder="Type Message ..." class="form-control">
                     <span class="input-group-btn">
-                            <button type="button" class="btn btn-warning btn-flat">Send</button>
+                            <button type="submit" class="btn btn-warning btn-flat">Send</button>
                           </span>
                 </div>
             </form>
@@ -105,9 +90,42 @@
 <script>
     export default {
         mounted() {
-            console.log('Component mounted.');
             $('.direct-chat-messages').slimScroll();
             $('.contacts-list').slimScroll();
+            this.getMessages();
+
+            Echo.join('chatroom')
+//                .here()
+//                .joining()
+//                .leaving()
+                .listen('MessagePosted', (e) => {
+                    console.log(e)
+                });
+        },
+        props:['user'],
+        data() {
+            return {
+                messages:[],
+                message:{},
+                content:'',
+                Luser:JSON.parse(this.user),
+            }
+        },
+        methods:{
+            sendMessage() {
+                axios.post('/messages',{message:this.content}).then((resp) => {
+//                    console.log(resp.data);
+                    this.message = {created_at:resp.data.created_at,message:resp.data.message,user_id:resp.data.user_id,user:this.Luser};
+                    this.messages.push(this.message);
+                    this.content='';
+                });
+            },
+            getMessages() {
+                axios.get('/messages').then((resp) => {
+//                    console.log(resp.data);
+                    this.messages = resp.data;
+                })
+            }
         }
     }
 </script>

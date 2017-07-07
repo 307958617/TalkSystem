@@ -23,7 +23,6 @@ class MessagePosted implements ShouldBroadcast
      */
 
     public $message;
-
     public $user;
 
     public function __construct(Message $message,User $user)
@@ -39,6 +38,6 @@ class MessagePosted implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PresenceChannel('chatroom');
+        return new Channel('chatroom');
     }
 }

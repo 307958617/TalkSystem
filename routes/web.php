@@ -28,6 +28,8 @@ Route::post('/messages',function (){
     $message = $user->messages()->create([
         'message' => request()->get('message')
     ]);
-    event(new \App\Events\MessagePosted($message,$user));
+//    $redis = Redis::connection();
+//    Redis::publish('chatroom',$message);
+    broadcast(new \App\Events\MessagePosted($message,$user))->toOthers();
     return $message;
 });

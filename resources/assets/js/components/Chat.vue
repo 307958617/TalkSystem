@@ -93,14 +93,6 @@
             $('.direct-chat-messages').slimScroll();
             $('.contacts-list').slimScroll();
             this.getMessages();
-
-            Echo.join('chatroom')
-//                .here()
-//                .joining()
-//                .leaving()
-                .listen('MessagePosted', (e) => {
-                    console.log(e)
-                });
         },
         props:['user'],
         data() {
@@ -111,12 +103,22 @@
                 Luser:JSON.parse(this.user),
             }
         },
+        sockets:{
+            chatroom(data) {
+                let msg = JSON.parse(data);
+                console.log(msg.data);
+                let message = msg.data.message;
+                let user = msg.data.user;
+                this.message = {created_at:message.created_at,message:message.message,user_id:message.user_id,user:user};
+                this.messages.push(this.message);
+            }
+        },
         methods:{
             sendMessage() {
                 axios.post('/messages',{message:this.content}).then((resp) => {
 //                    console.log(resp.data);
-                    this.message = {created_at:resp.data.created_at,message:resp.data.message,user_id:resp.data.user_id,user:this.Luser};
-                    this.messages.push(this.message);
+//                    this.message = {created_at:resp.data.created_at,message:resp.data.message,user_id:resp.data.user_id,user:this.Luser};
+//                    this.messages.push(this.message);
                     this.content='';
                 });
             },

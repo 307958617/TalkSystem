@@ -17,7 +17,7 @@
     <!-- Ionicons -->
     <link href="https://cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
 @yield('css')
-    <script src="//{{ Request::getHost() }}:6001/socket.io/socket.io.js"></script>
+    {{--<script src="//{{ Request::getHost() }}:6001/socket.io/socket.io.js"></script>--}}
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>

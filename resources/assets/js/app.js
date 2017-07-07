@@ -8,8 +8,11 @@
 require('./bootstrap');
 require('./adminlte');
 require('./jquery.slimscroll');
+import VueSocketio from 'vue-socket.io';
 
 window.Vue = require('vue');
+
+Vue.use(VueSocketio,'http://talk.app:3000');
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

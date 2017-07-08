@@ -33,7 +33,7 @@
                 <!-- /.direct-chat-msg -->
             </div>
             <!--/.direct-chat-messages-->
-
+            <div id="typingBox" v-show="isTyping">{{ typingUserName }} is typing...</div>
             <!-- Contacts are loaded here -->
             <div class="direct-chat-contacts">
                 <ul class="contacts-list">
@@ -76,7 +76,7 @@
         <div class="box-footer">
             <form @submit.prevent="sendMessage">
                 <div class="input-group">
-                    <input v-model="content" type="text" name="message" placeholder="Type Message ..." class="form-control">
+                    <input @input="typingWords" v-model="content" type="text" name="message" placeholder="Type Message ..." class="form-control">
                     <span class="input-group-btn">
                             <button type="submit" class="btn btn-warning btn-flat">Send</button>
                           </span>
@@ -101,6 +101,12 @@
                 message:{},
                 content:'',
                 Luser:JSON.parse(this.user),
+                isTyping:false,
+                typingUserName:'',
+                lastTypingTime:'',
+                typingTimer:'',
+                timeDiff:'',
+                TYPING_TIMER_LENGTH:500
             }
         },
         sockets:{
@@ -111,9 +117,31 @@
                 let user = msg.data.user;
                 this.message = {created_at:message.created_at,message:message.message,user_id:message.user_id,user:user};
                 this.messages.push(this.message);
+            },
+            sockTyping(data) {
+                this.typingUserName = data;
+                this.isTyping = true;
+            },
+            sockStopTyping() {
+                this.isTyping = false;
             }
         },
         methods:{
+            typingWords() {
+                this.$socket.emit('typing',this.Luser.name);
+                this.lastTypingTime = (new Date()).getTime();
+                console.log(this.lastTypingTime);
+                setTimeout(function () {
+                    this.typingTimer = (new Date()).getTime();
+                    console.log(this.typingTimer);
+                    this.timeDiff = this.typingTimer - this.lastTypingTime;
+                    console.log(this.timeDiff);
+                    if (this.timeDiff >= this.TYPING_TIMER_LENGTH) {
+                        this.$socket.emit('stopTyping');
+                    }
+                }.bind(this),this.TYPING_TIMER_LENGTH)
+
+            },
             sendMessage() {
                 axios.post('/messages',{message:this.content}).then((resp) => {
 //                    console.log(resp.data);

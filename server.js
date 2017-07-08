@@ -14,6 +14,15 @@ io.on('connection',function (socket) {
     redisClient.on('message',function (channel,message) {
         console.log('ss'+ channel + message);
         socket.emit(channel,message);
+    });
+    socket.on('typing',function (data) {
+        console.log(data + 'is typing');
+        socket.broadcast.emit('sockTyping',data)
+    });
+
+    socket.on('stopTyping',function () {
+        socket.broadcast.emit('sockStopTyping')
     })
+
 
 });

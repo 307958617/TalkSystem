@@ -33,7 +33,6 @@
                 <!-- /.direct-chat-msg -->
             </div>
             <!--/.direct-chat-messages-->
-            <div id="typingBox" v-show="isTyping">{{ typingUserName }} is typing...</div>
             <!-- Contacts are loaded here -->
             <div class="direct-chat-contacts">
                 <ul class="contacts-list">
@@ -82,6 +81,7 @@
                           </span>
                 </div>
             </form>
+            <div id="typingBox" v-show="isTyping">{{ typingUserName }} 正在输入...</div>
         </div>
         <!-- /.box-footer-->
     </div>

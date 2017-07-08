@@ -33526,17 +33526,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }), _vm._v(" "), _c('div', {
       staticClass: "direct-chat-text"
     }, [_vm._v("\n                    " + _vm._s(message.message) + "\n                  ")])])
-  })), _vm._v(" "), _c('div', {
-    directives: [{
-      name: "show",
-      rawName: "v-show",
-      value: (_vm.isTyping),
-      expression: "isTyping"
-    }],
-    attrs: {
-      "id": "typingBox"
-    }
-  }, [_vm._v(_vm._s(_vm.typingUserName) + " is typing...")]), _vm._v(" "), _vm._m(1)]), _vm._v(" "), _c('div', {
+  })), _vm._v(" "), _vm._m(1)]), _vm._v(" "), _c('div', {
     staticClass: "box-footer"
   }, [_c('form', {
     on: {
@@ -33569,7 +33559,17 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         _vm.content = $event.target.value
       }, _vm.typingWords]
     }
-  }), _vm._v(" "), _vm._m(2)])])])])
+  }), _vm._v(" "), _vm._m(2)])]), _vm._v(" "), _c('div', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.isTyping),
+      expression: "isTyping"
+    }],
+    attrs: {
+      "id": "typingBox"
+    }
+  }, [_vm._v(_vm._s(_vm.typingUserName) + " 正在输入...")])])])
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "box-header with-border"

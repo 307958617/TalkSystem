@@ -93,17 +93,19 @@
             $('.contacts-list').slimScroll();
             this.getMessages();
         },
-        watch: {//实现vue滚动条总是在最底部
+        watch: {
             messages() {
 //                console.log("messages change");
                 this.$nextTick(() => {
-//                    var container = $("#chatContainer");
+                    var container = this.$el.querySelector("#chatContainer");
 //                    console.log(container);
-//                    $("#chatContainer").scrollTop = $("#chatContainer").scrollHeight;
+                    container.scrollTop = container.scrollHeight;
                     $('#chatContainer').slimScroll({
                         start: 'bottom'
                     });
                 });
+//                document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight+150;
+
             }
         },
         props:['user'],

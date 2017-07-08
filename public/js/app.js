@@ -1813,17 +1813,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     watch: {
-        //实现vue滚动条总是在最底部
         messages: function messages() {
+            var _this = this;
+
             //                console.log("messages change");
             this.$nextTick(function () {
-                //                    var container = $("#chatContainer");
+                var container = _this.$el.querySelector("#chatContainer");
                 //                    console.log(container);
-                //                    $("#chatContainer").scrollTop = $("#chatContainer").scrollHeight;
+                container.scrollTop = container.scrollHeight;
                 $('#chatContainer').slimScroll({
                     start: 'bottom'
                 });
             });
+            //                document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight+150;
         }
     },
     props: ['user'],
@@ -1875,21 +1877,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }.bind(this), this.TYPING_TIMER_LENGTH);
         },
         sendMessage: function sendMessage() {
-            var _this = this;
+            var _this2 = this;
 
             axios.post('/messages', { message: this.content }).then(function (resp) {
                 //                    console.log(resp.data);
                 //                    this.message = {created_at:resp.data.created_at,message:resp.data.message,user_id:resp.data.user_id,user:this.Luser};
                 //                    this.messages.push(this.message);
-                _this.content = '';
+                _this2.content = '';
             });
         },
         getMessages: function getMessages() {
-            var _this2 = this;
+            var _this3 = this;
 
             axios.get('/messages').then(function (resp) {
                 //                    console.log(resp.data);
-                _this2.messages = resp.data;
+                _this3.messages = resp.data;
             });
         }
     }

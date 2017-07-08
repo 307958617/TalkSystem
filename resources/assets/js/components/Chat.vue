@@ -16,7 +16,7 @@
         <!-- /.box-header -->
         <div class="box-body">
             <!-- Conversations are loaded here -->
-            <div class="direct-chat-messages" id="messages">
+            <div class="direct-chat-messages" id="chatContainer">
                 <!-- Message. Default to the left -->
                 <div class="direct-chat-msg" :class="[Luser.id == message.user_id ? 'right' :'']" v-for="message in messages">
                     <div class="direct-chat-info clearfix">
@@ -90,9 +90,21 @@
 <script>
     export default {
         mounted() {
-            $('.direct-chat-messages').slimScroll();
             $('.contacts-list').slimScroll();
             this.getMessages();
+        },
+        watch: {//实现vue滚动条总是在最底部
+            messages() {
+//                console.log("messages change");
+                this.$nextTick(() => {
+//                    var container = $("#chatContainer");
+//                    console.log(container);
+//                    $("#chatContainer").scrollTop = $("#chatContainer").scrollHeight;
+                    $('#chatContainer').slimScroll({
+                        start: 'bottom'
+                    });
+                });
+            }
         },
         props:['user'],
         data() {

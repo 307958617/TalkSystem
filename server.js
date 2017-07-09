@@ -27,13 +27,21 @@ io.on('connection',function (socket) {
     });
     // 用户进入提示
     socket.on('new user',function (data) {
-        // console.log(data);
-        socket.user = data;
-        console.log(data);
-        socket.broadcast.emit('sockNewUser',data);
-        users[JSON.stringify(socket.user)] = socket.id;
+        let loginTime = (new Date()).getTime();
+        let newUser = JSON.parse(data);
+        newUser['loginTime'] = loginTime;
+        newUser['name'] = toUnicode(newUser['name']);
+        socket.user = JSON.stringify(newUser);
+        socket.broadcast.emit('sockNewUser',newUser);
+        users[socket.user] = socket.id;
         upDateUsers();
     });
+
+    function toUnicode(s){//只将汉字转换成Unicode，英文不转换
+        return s.replace(/([\u4E00-\u9FA5]|[\uFE30-\uFFA0])/g,function(newStr){
+            return "\\u" + newStr.charCodeAt(0).toString(16);
+        });
+    }
 
     function upDateUsers() {
         io.emit('sockUsers',Object.keys(users))
@@ -41,7 +49,7 @@ io.on('connection',function (socket) {
 
     socket.on('disconnect',function (data) {
         if(!socket.user) return;
-        delete users[JSON.stringify(socket.user)];
+        delete users[socket.user];
         upDateUsers()
     })
 

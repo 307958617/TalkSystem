@@ -6,7 +6,7 @@
                     <h3 class="box-title">Direct Chat</h3>
 
                     <div class="box-tools pull-right">
-                        <span data-toggle="tooltip" title="" class="badge bg-yellow" data-original-title="3 New Messages">3</span>
+                        <span data-toggle="tooltip" title="" class="badge bg-yellow" data-original-title="3 New Messages">{{ users.length }}</span>
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
                         <button type="button" class="btn btn-box-tool" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Contacts">
@@ -128,20 +128,20 @@
                 typingTimer:'',
                 timeDiff:'',
                 TYPING_TIMER_LENGTH:500,
-                users:{}
+                users:{},
             }
         },
         sockets:{
             connect() {
 //                console.log(this.Luser.name + '进入了房间');
-                this.$socket.emit('new user',this.Luser)
+                this.$socket.emit('new user',this.user)
             },
             sockNewUser(data) {
                 console.log(data.name + '加入了房间')
             },
             sockUsers(data) {
                 this.users = data;
-                console.log(data.length);
+                console.log(data);
             },
             chatroom(data) {
                 let msg = JSON.parse(data);

@@ -1855,14 +1855,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     sockets: {
         connect: function connect() {
             //                console.log(this.Luser.name + '进入了房间');
-            this.$socket.emit('new user', this.Luser);
+            this.$socket.emit('new user', this.user);
         },
         sockNewUser: function sockNewUser(data) {
             console.log(data.name + '加入了房间');
         },
         sockUsers: function sockUsers(data) {
             this.users = data;
-            console.log(data.length);
+            console.log(data);
         },
         chatroom: function chatroom(data) {
             var msg = JSON.parse(data);
@@ -1986,7 +1986,52 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['users']
+    props: ['users'],
+    methods: {
+        tohanzi: function tohanzi(data) {
+            //只对Unicode即含有'\u'的字符转码成汉字
+            if (data.indexOf("\\u") == -1) return data;
+            data = data.split("\\u");
+            var str = '';
+            for (var i = 0; i < data.length; i++) {
+                str += String.fromCharCode(parseInt(data[i], 16).toString(10));
+            }
+            return str;
+        },
+        goodTime: function goodTime(str) {
+            //美化日期
+            var now = new Date().getTime(),
+                oldTime = new Date(str).getTime(),
+                difference = now - oldTime,
+                result = '',
+                minute = 1000 * 60,
+                hour = minute * 60,
+                day = hour * 24,
+                halfamonth = day * 15,
+                month = day * 30,
+                year = month * 12,
+                _year = difference / year,
+                _month = difference / month,
+                _week = difference / (7 * day),
+                _day = difference / day,
+                _hour = difference / hour,
+                _min = difference / minute;
+            if (_year >= 1) {
+                result = "" + ~~_year + " 年前登录";
+            } else if (_month >= 1) {
+                result = "" + ~~_month + " 个月前登录";
+            } else if (_week >= 1) {
+                result = "" + ~~_week + " 周前登录";
+            } else if (_day >= 1) {
+                result = "" + ~~_day + " 天前登录";
+            } else if (_hour >= 1) {
+                result = "" + ~~_hour + " 个小时前登录";
+            } else if (_min >= 1) {
+                result = "" + ~~_min + " 分钟前登录";
+            } else result = "刚刚登录";
+            return result;
+        }
+    }
 });
 
 /***/ }),
@@ -33506,7 +33551,20 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "col-md-8"
   }, [_c('div', {
     staticClass: "box box-warning direct-chat direct-chat-warning"
-  }, [_vm._m(0), _vm._v(" "), _c('div', {
+  }, [_c('div', {
+    staticClass: "box-header with-border"
+  }, [_c('h3', {
+    staticClass: "box-title"
+  }, [_vm._v("Direct Chat")]), _vm._v(" "), _c('div', {
+    staticClass: "box-tools pull-right"
+  }, [_c('span', {
+    staticClass: "badge bg-yellow",
+    attrs: {
+      "data-toggle": "tooltip",
+      "title": "",
+      "data-original-title": "3 New Messages"
+    }
+  }, [_vm._v(_vm._s(_vm.users.length))]), _vm._v(" "), _vm._m(0), _vm._v(" "), _vm._m(1), _vm._v(" "), _vm._m(2)])]), _vm._v(" "), _c('div', {
     staticClass: "box-body"
   }, [_c('div', {
     staticClass: "direct-chat-messages",
@@ -33532,7 +33590,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }), _vm._v(" "), _c('div', {
       staticClass: "direct-chat-text"
     }, [_vm._v("\n                            " + _vm._s(message.message) + "\n                  ")])])
-  })), _vm._v(" "), _vm._m(1)]), _vm._v(" "), _c('div', {
+  })), _vm._v(" "), _vm._m(3)]), _vm._v(" "), _c('div', {
     staticClass: "box-footer"
   }, [_c('form', {
     on: {
@@ -33565,7 +33623,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         _vm.content = $event.target.value
       }, _vm.typingWords]
     }
-  }), _vm._v(" "), _vm._m(2)])]), _vm._v(" "), _c('div', {
+  }), _vm._v(" "), _vm._m(4)])]), _vm._v(" "), _c('div', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -33583,20 +33641,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   })], 1)])
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
-    staticClass: "box-header with-border"
-  }, [_c('h3', {
-    staticClass: "box-title"
-  }, [_vm._v("Direct Chat")]), _vm._v(" "), _c('div', {
-    staticClass: "box-tools pull-right"
-  }, [_c('span', {
-    staticClass: "badge bg-yellow",
-    attrs: {
-      "data-toggle": "tooltip",
-      "title": "",
-      "data-original-title": "3 New Messages"
-    }
-  }, [_vm._v("3")]), _vm._v(" "), _c('button', {
+  return _c('button', {
     staticClass: "btn btn-box-tool",
     attrs: {
       "type": "button",
@@ -33604,7 +33649,9 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-minus"
-  })]), _vm._v(" "), _c('button', {
+  })])
+},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('button', {
     staticClass: "btn btn-box-tool",
     attrs: {
       "type": "button",
@@ -33615,7 +33662,9 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-comments"
-  })]), _vm._v(" "), _c('button', {
+  })])
+},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('button', {
     staticClass: "btn btn-box-tool",
     attrs: {
       "type": "button",
@@ -33623,7 +33672,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-times"
-  })])])])
+  })])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "direct-chat-contacts"
@@ -33739,9 +33788,9 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       attrs: {
         "href": "#"
       }
-    }, [_vm._v(_vm._s(JSON.parse(user).name))]), _vm._v(" "), _c('span', {
+    }, [_vm._v(_vm._s(_vm.tohanzi(JSON.parse(user).name)))]), _vm._v(" "), _c('span', {
       staticClass: "users-list-date"
-    }, [_vm._v(_vm._s(JSON.parse(user).created_at))])])
+    }, [_vm._v(_vm._s(_vm.goodTime(JSON.parse(user).loginTime)))])])
   }))]), _vm._v(" "), _vm._m(1), _vm._v(" "), _c('div', [_vm._v(_vm._s(_vm.users.length))])])
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {

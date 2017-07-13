@@ -855,6 +855,7 @@ Vue.component('example', __webpack_require__(41));
 Vue.component('chat', __webpack_require__(40));
 Vue.component('members', __webpack_require__(42));
 Vue.component('upload-avatar', __webpack_require__(43));
+Vue.component('user-image', __webpack_require__(66));
 
 var app = new Vue({
   el: '#app'
@@ -45461,6 +45462,97 @@ __webpack_require__(63);
 exports.setImmediate = setImmediate;
 exports.clearImmediate = clearImmediate;
 
+
+/***/ }),
+/* 65 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['src', 'imgClass', 'alt'],
+    created: function created() {
+        this.imgSrc = this.src;
+    },
+    data: function data() {
+        return {
+            'imgSrc': ''
+        };
+    },
+
+    methods: {
+        userImageChanged: function userImageChanged(imgSrc) {
+            this.imgSrc = imgSrc;
+            console.log('changed to ', imgSrc);
+        }
+    },
+    sockets: {
+        user_image_upload: function user_image_upload(imgSrc) {
+            console.log(imgSrc);
+            this.userImageChanged(imgSrc);
+        }
+    }
+});
+
+/***/ }),
+/* 66 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(65),
+  /* template */
+  __webpack_require__(67),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "/home/vagrant/Code/TalkSystem/resources/assets/js/components/UserImage.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] UserImage.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-loader/node_modules/vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-ca77101e", Component.options)
+  } else {
+    hotAPI.reload("data-v-ca77101e", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('img', {
+    class: _vm.imgClass,
+    attrs: {
+      "src": _vm.imgSrc,
+      "alt": _vm.alt
+    }
+  })
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-ca77101e", module.exports)
+  }
+}
 
 /***/ })
 /******/ ]);

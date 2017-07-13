@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 
 class ProfileController extends Controller
 {
@@ -32,6 +33,7 @@ class ProfileController extends Controller
         $user->avatar = $imageUrl;
         $user->save();
 
+        Redis::publish('user_image_upload',$imageUrl);
         return response(['data'=> $user]);
     }
 }

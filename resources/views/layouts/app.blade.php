@@ -167,14 +167,16 @@
                                 <!-- Menu Toggle Button -->
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     <!-- The user image in the navbar-->
-                                    <img src="{{ Auth::user()->avatar }}" class="user-image" alt="User Image">
+                                    {{--<img src="{{ Auth::user()->avatar }}" class="user-image" alt="User Image">--}}
+                                    <user-image src="{{ Auth::user()->avatar }}" class="user-image" alt="User Image"></user-image>
                                     <!-- hidden-xs hides the username on small devices so only the image appears. -->
                                     <span class="hidden-xs">{{ Auth::user()->name }}</span>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <!-- The user image in the menu -->
                                     <li class="user-header">
-                                        <img src="{{ Auth::user()->avatar }}" class="img-circle" alt="User Image">
+                                        {{--<img src="{{ Auth::user()->avatar }}" class="img-circle" alt="User Image">--}}
+                                        <user-image src="{{ Auth::user()->avatar }}" class="img-circle" alt="User Image"></user-image>
                                         <p>
                                             Alexander-Web Developer
                                             <small>Member since Nov. 2012</small>

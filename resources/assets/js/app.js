@@ -26,6 +26,7 @@ Vue.component('example', require('./components/Example.vue'));
 Vue.component('chat', require('./components/Chat.vue'));
 Vue.component('members', require('./components/Members.vue'));
 Vue.component('upload-avatar', require('./components/UploadAvatar.vue'));
+Vue.component('user-image', require('./components/UserImage.vue'));
 
 const app = new Vue({
     el: '#app'

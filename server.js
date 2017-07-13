@@ -12,6 +12,8 @@ io.on('connection',function (socket) {
     console.log('a new connected');
     var redisClient = redis.createClient();
     redisClient.subscribe('chatroom');
+    redisClient.subscribe('user_image_upload');
+
     redisClient.on('message',function (channel,message) {
         // console.log('ss'+ channel + message);
         socket.emit(channel,message);

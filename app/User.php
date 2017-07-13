@@ -31,4 +31,15 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Message');
     }
+
+    public function removeAvatar()
+    {
+        if($this->avatar){
+            $imgName = explode('/',$this->avatar);
+            $imgName = $imgName[count($imgName) -1];
+            if($imgName != 'female.jpg' && $imgName != 'male.jpg') {
+                unlink(storage_path('app/public/images/avatars/').$imgName);
+            }
+        }
+    }
 }

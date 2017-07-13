@@ -84,7 +84,8 @@
                 }).then(response => {
                     this.image = response;
                     axios.post('/avatar-upload',{img: this.image}).then(response => {
-                        this.modelVisible = false
+                        this.modelVisible = false;
+                        console.log(response)
                     })
                 })
             }

@@ -2128,6 +2128,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 _this.image = response;
                 axios.post('/avatar-upload', { img: _this.image }).then(function (response) {
                     _this.modelVisible = false;
+                    console.log(response);
                 });
             });
         }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -23,5 +25,13 @@ class ProfileController extends Controller
             mkdir($path,0755,true);
         }
         file_put_contents($path.$imageName,$data);
+
+        $imageUrl = asset('/storage/images/avatars').'/'.$imageName;
+        $user = User::find(Auth::id());
+        $user->removeAvatar();
+        $user->avatar = $imageUrl;
+        $user->save();
+
+        return response(['data'=> $user]);
     }
 }

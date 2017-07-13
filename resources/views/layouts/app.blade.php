@@ -198,7 +198,7 @@
                                     <!-- Menu Footer-->
                                     <li class="user-footer">
                                         <div class="pull-left">
-                                            <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                            <a href="{{ route('edit.profile') }}" class="btn btn-default btn-flat">Profile</a>
                                         </div>
                                         <div class="pull-right">
                                             <form action="{{ route('logout') }}" method="post">
@@ -264,9 +264,9 @@
 
 <!-- Scripts -->
 <script src="{{ asset('js/app.js') }}"></script>
-<script>
-    @yield('js')
-</script>
+
+@yield('js')
+
 
 </body>
 </html>

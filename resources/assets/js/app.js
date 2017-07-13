@@ -9,12 +9,12 @@ require('./bootstrap');
 require('./adminlte');
 require('./jquery.slimscroll');
 import VueSocketio from 'vue-socket.io';
-import VueChatScroll from 'vue-chat-scroll'
+
 
 window.Vue = require('vue');
 
 Vue.use(VueSocketio,'http://talk.app:3000');
-Vue.use(VueChatScroll);
+
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -25,6 +25,7 @@ Vue.use(VueChatScroll);
 Vue.component('example', require('./components/Example.vue'));
 Vue.component('chat', require('./components/Chat.vue'));
 Vue.component('members', require('./components/Members.vue'));
+Vue.component('upload-avatar', require('./components/UploadAvatar.vue'));
 
 const app = new Vue({
     el: '#app'

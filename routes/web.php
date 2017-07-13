@@ -17,6 +17,9 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::get('/profile', 'ProfileController@edit')->name('edit.profile');
+Route::post('/avatar-upload', 'ProfileController@avatarUpload')->name('avatar.upload');
+
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/messages',function (){

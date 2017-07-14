@@ -331,7 +331,216 @@
         }
     </script>
 #### ②、Members.vue的具体内容为(即当前所有登陆用户信息)：
+    <template>
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">Latest Members</h3><!-- 标题 -->
     
+                <div class="box-tools pull-right">
+                    <span class="label label-danger">{{ users.length }} Members</span><!-- 当前用户人数 -->
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding">
+                <ul class="users-list clearfix">
+                    <li v-for="user in users">
+                        <img style="width: 50px;height: 50px" :src="JSON.parse(user).avatar" alt="User Image">
+                        <a class="users-list-name" href="#">{{ tohanzi(JSON.parse(user).name) }}</a>
+                        <span class="users-list-date">{{ goodTime(JSON.parse(user).loginTime) }}</span>
+                    </li>
+                </ul>
+                <!-- /.users-list -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer text-center">
+                <a href="javascript:void(0)" class="uppercase">View All Users</a>
+            </div>
+            <!-- /.box-footer -->
+        </div>
+    </template>
+    
+    <script>
+        export default {
+            props:['users'],//这里的users是从chat.vue里面传递过来的。
+            methods:{
+                tohanzi(data){//只对Unicode即含有'\u'的字符转码成汉字
+                    if(data.indexOf("\\u") == -1) return data;
+                    data = data.split("\\u");
+                    let str ='';
+                    for(let i=0;i<data.length;i++)
+                    {
+                        str+=String.fromCharCode(parseInt(data[i],16).toString(10));
+                    }
+                    return str;
+                },
+                goodTime(str){//美化日期
+                    let now = new Date().getTime(),
+                        oldTime = new Date(str).getTime(),
+                        difference = now - oldTime,
+                        result='',
+                        minute = 1000 * 60,
+                        hour = minute * 60,
+                        day = hour * 24,
+                        halfamonth = day * 15,
+                        month = day * 30,
+                        year = month * 12,
+    
+                        _year = difference/year,
+                        _month =difference/month,
+                        _week =difference/(7*day),
+                        _day =difference/day,
+                        _hour =difference/hour,
+                        _min =difference/minute;
+                    if(_year>=1) {result= "" + ~~(_year) + " 年前登录"}
+                    else if(_month>=1) {result= "" + ~~(_month) + " 个月前登录"}
+                    else if(_week>=1) {result= "" + ~~(_week) + " 周前登录"}
+                    else if(_day>=1) {result= "" + ~~(_day) +" 天前登录"}
+                    else if(_hour>=1) {result= "" + ~~(_hour) +" 个小时前登录"}
+                    else if(_min>=1) {result= "" + ~~(_min) +" 分钟前登录"}
+                    else result="刚刚登录";
+                    return result;
+                }
+            }
+        }
+    </script>
+#### ③、要实现实时聊天功能，需要安装如下模块：express,socket.io,redis,vue-socket.io:
+    执行如下命令：npm install express socket.io redis vue-socket.io --save
+#### ④、在web.php路由文件添加获得聊天信息的路由：
+    Route::get('/messages',function (){
+        return $messages = \App\Message::with('user')->get();
+    })->middleware('auth');
+#### ⑤、在web.php路由文件添加提交聊天信息并保存到数据库的路由：
+    Route::post('/messages',function (){
+        $user = Auth::user();
+        $message = $user->messages()->create([
+            'message' => request()->get('message')
+        ]);
+    //    $redis = Redis::connection();
+    //    Redis::publish('chatroom',$message);
+        broadcast(new \App\Events\MessagePosted($message,$user))->toOthers();
+        return $message;
+    });
+#### ⑥、执行php artisan make:event MessagePosted命令，创建MessagePosted Event,具体内容为：
+    <?php
+    
+    namespace App\Events;
+    
+    use App\Message;
+    use App\User;
+    use Illuminate\Broadcasting\Channel;
+    use Illuminate\Queue\SerializesModels;
+    use Illuminate\Broadcasting\PrivateChannel;
+    use Illuminate\Broadcasting\PresenceChannel;
+    use Illuminate\Foundation\Events\Dispatchable;
+    use Illuminate\Broadcasting\InteractsWithSockets;
+    use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+    
+    class MessagePosted implements ShouldBroadcast //这里需要添加implements ShouldBroadcast才能广播出去
+    {
+        use Dispatchable, InteractsWithSockets, SerializesModels;
+    
+        /**
+         * Create a new event instance.
+         *
+         * @return void
+         */
+    
+        public $message;
+        public $user;
+    
+        public function __construct(Message $message,User $user)
+        {
+            $this->message = $message;
+            $this->user = $user;
+        }
+    
+        /**
+         * Get the channels the event should broadcast on.
+         *
+         * @return Channel|array
+         */
+        public function broadcastOn()
+        {
+            return new Channel('chatroom');
+        }
+    }
+#### ⑦、修改routes->channels.php文件，添加如下代码：
+    Broadcast::channel('chatroom', function ($user) {
+        return true;
+    });
+#### ⑧、之后需要修改.evn文件：
+    BROADCAST_DRIVER=redis
+#### ⑨、修改config->app.php文件:
+    注册开：App\Providers\BroadcastServiceProvider::class,
+#### ⑩、如果需要实现广播，需要redis，使用redis的前提是安装predis：
+    执行：composer require predis/predis
+
+#### ⑪、在根目录下面创建server.js后台，代码如下：
+    var app = require('express')();
+    var server = require('http').Server(app);
+    var io = require('socket.io')(server);
+    var redis = require('redis');
+    let users = {};
+    
+    server.listen(3000,function () {
+        console.log('server start')
+    });
+    
+    io.on('connection',function (socket) {
+        console.log('a new connected');
+        var redisClient = redis.createClient();
+        redisClient.subscribe('chatroom');
+        redisClient.subscribe('user_image_upload');
+    
+        redisClient.on('message',function (channel,message) {
+            // console.log('ss'+ channel + message);
+            socket.emit(channel,message);
+        });
+    
+        socket.on('typing',function (data) {
+            // console.log(data + 'is typing');
+            socket.broadcast.emit('sockTyping',data)
+        });
+    
+        socket.on('stopTyping',function () {
+            socket.broadcast.emit('sockStopTyping')
+        });
+        // 用户进入提示
+        socket.on('new user',function (data) {
+            let loginTime = (new Date()).getTime();
+            let newUser = JSON.parse(data);
+            newUser['loginTime'] = loginTime;
+            newUser['name'] = toUnicode(newUser['name']);
+            socket.user = JSON.stringify(newUser);
+            socket.broadcast.emit('sockNewUser',newUser);
+            users[socket.user] = socket.id;
+            upDateUsers();
+        });
+    
+        function toUnicode(s){//只将汉字转换成Unicode，英文不转换
+            return s.replace(/([\u4E00-\u9FA5]|[\uFE30-\uFFA0])/g,function(newStr){
+                return "\\u" + newStr.charCodeAt(0).toString(16);
+            });
+        }
+    
+        function upDateUsers() {
+            io.emit('sockUsers',Object.keys(users))
+        }
+    
+        socket.on('disconnect',function (data) {
+            if(!socket.user) return;
+            delete users[socket.user];
+            upDateUsers()
+        })
+    });
+#### ⑫、需要在app.js里面引入vue-socket.io:
+    import VueSocketio from 'vue-socket.io';
+    Vue.use(VueSocketio,'http://talk.app:3000');
 ### 5、到resources->assets->js->app.js里面注册chat.vue,members.vue:
     Vue.component('chat', require('./components/Chat.vue'));
+    Vue.component('members', require('./components/Members.vue'));
 ### 6、执行npm run watch

@@ -2188,10 +2188,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['users'],
+    props: ['users'], //这里的users是从chat.vue里面传递过来的。
     methods: {
         tohanzi: function tohanzi(data) {
             //只对Unicode即含有'\u'的字符转码成汉字
@@ -35753,7 +35752,15 @@ if (false) {
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "box box-danger"
-  }, [_vm._m(0), _vm._v(" "), _c('div', {
+  }, [_c('div', {
+    staticClass: "box-header with-border"
+  }, [_c('h3', {
+    staticClass: "box-title"
+  }, [_vm._v("Latest Members")]), _vm._v(" "), _c('div', {
+    staticClass: "box-tools pull-right"
+  }, [_c('span', {
+    staticClass: "label label-danger"
+  }, [_vm._v(_vm._s(_vm.users.length) + " Members")]), _vm._v(" "), _vm._m(0), _vm._v(" "), _vm._m(1)])]), _vm._v(" "), _c('div', {
     staticClass: "box-body no-padding"
   }, [_c('ul', {
     staticClass: "users-list clearfix"
@@ -35775,17 +35782,9 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }, [_vm._v(_vm._s(_vm.tohanzi(JSON.parse(user).name)))]), _vm._v(" "), _c('span', {
       staticClass: "users-list-date"
     }, [_vm._v(_vm._s(_vm.goodTime(JSON.parse(user).loginTime)))])])
-  }))]), _vm._v(" "), _vm._m(1), _vm._v(" "), _c('div', [_vm._v(_vm._s(_vm.users.length))])])
+  }))]), _vm._v(" "), _vm._m(2)])
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
-    staticClass: "box-header with-border"
-  }, [_c('h3', {
-    staticClass: "box-title"
-  }, [_vm._v("Latest Members")]), _vm._v(" "), _c('div', {
-    staticClass: "box-tools pull-right"
-  }, [_c('span', {
-    staticClass: "label label-danger"
-  }, [_vm._v("8 New Members")]), _vm._v(" "), _c('button', {
+  return _c('button', {
     staticClass: "btn btn-box-tool",
     attrs: {
       "type": "button",
@@ -35793,7 +35792,9 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-minus"
-  })]), _vm._v(" "), _c('button', {
+  })])
+},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('button', {
     staticClass: "btn btn-box-tool",
     attrs: {
       "type": "button",
@@ -35801,7 +35802,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-times"
-  })])])])
+  })])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "box-footer text-center"

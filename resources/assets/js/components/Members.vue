@@ -1,10 +1,10 @@
 <template>
     <div class="box box-danger">
         <div class="box-header with-border">
-            <h3 class="box-title">Latest Members</h3>
+            <h3 class="box-title">Latest Members</h3><!-- 标题 -->
 
             <div class="box-tools pull-right">
-                <span class="label label-danger">8 New Members</span>
+                <span class="label label-danger">{{ users.length }} Members</span><!-- 当前用户人数 -->
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
                 </button>
                 <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i>
@@ -26,14 +26,13 @@
         <div class="box-footer text-center">
             <a href="javascript:void(0)" class="uppercase">View All Users</a>
         </div>
-        <div>{{ users.length }}</div>
         <!-- /.box-footer -->
     </div>
 </template>
 
 <script>
     export default {
-        props:['users'],
+        props:['users'],//这里的users是从chat.vue里面传递过来的。
         methods:{
             tohanzi(data){//只对Unicode即含有'\u'的字符转码成汉字
                 if(data.indexOf("\\u") == -1) return data;

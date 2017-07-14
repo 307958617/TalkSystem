@@ -2272,41 +2272,45 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
-
+ //引入croppie，在此之前需要安装croppie，即执行：npm install croppie --save
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['avatar'],
+    props: ['avatar'], //将当前登录用户的头像地址传递进来
     data: function data() {
         return {
-            image: null,
+            image: null, //定义图片的src地址
             croppie: null,
-            modelVisible: false
+            modelVisible: false //定义model的显示状态，默认是不显示
         };
     },
     mounted: function mounted() {
         this.$on('imageUploaded', function (imageData) {
-            this.image = imageData;
-            this.croppie.destroy();
-            this.setupCroppie(imageData);
+            //监听上传图片事件，如果上传了新图片则执行下面代码
+            this.image = imageData; //将当前的图片设置为新上传的图片
+            this.croppie.destroy(); //重新销毁croppie
+            this.setupCroppie(imageData); //重新初始化croppie
         });
 
-        this.image = this.avatar;
+        this.image = this.avatar; //初始化时，显示的图片是用户的图片
         this.setupCroppie(); //初始化croppie
     },
 
     methods: {
         setupCroppie: function setupCroppie() {
-            var el = document.getElementById('croppie');
+            //初始化croppie
+            var el = document.getElementById('croppie'); //指定容器
             this.croppie = new __WEBPACK_IMPORTED_MODULE_0_croppie___default.a(el, {
 
-                viewport: { width: 200, height: 200, type: 'circle' },
-                boundary: { width: 250, height: 250 }
+                viewport: { width: 200, height: 200, type: 'circle' }, //生成的图片大小及形状设置
+                boundary: { width: 250, height: 250 } //背景大小设置
             });
             this.croppie.bind({
-                url: this.image
+                url: this.image //croppie里面显示图片地址，默认为传递进来的登录用户的头像地址avatar。
             });
         },
         setUpFileUploader: function setUpFileUploader(e) {
+            //实现选择图片后生产图片功能
             var files = e.target.files || e.dataTransfer.files;
             if (!files) {
                 return;
@@ -2314,13 +2318,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.createImage(files[0]);
         },
         createImage: function createImage(file) {
+            //具体实现生成图片
             var image = new Image();
             var reader = new FileReader();
             var vm = this;
 
             reader.onload = function (e) {
                 vm.image = e.target.result;
-                vm.$emit('imageUploaded', e.target.result);
+                vm.$emit('imageUploaded', e.target.result); //发布图片上传消息，将新的图片数据发送出去
             };
 
             reader.readAsDataURL(file);
@@ -2328,13 +2333,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         uploadFile: function uploadFile() {
             var _this = this;
 
-            this.croppie.result({
+            //实现点击图片上传功能
+            this.croppie.result({ //对图片进行如下处理并返回response
                 type: 'canvas',
                 size: 'viewport'
             }).then(function (response) {
-                _this.image = response;
+                _this.image = response; //这里的response是经过croppie剪切处理后的图片
                 axios.post('/avatar-upload', { img: _this.image }).then(function (response) {
-                    _this.modelVisible = false;
+                    //将图片传递到larvel后台进行处理
+                    _this.modelVisible = false; //成功后隐藏上传按钮
                     console.log(response);
                 });
             });
@@ -2352,11 +2359,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['src', 'imgClass', 'alt'],
     created: function created() {
-        this.imgSrc = this.src;
+        this.imgSrc = this.src; //初始化的地址为传递进来的地址
     },
     data: function data() {
         return {
@@ -2366,12 +2374,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         userImageChanged: function userImageChanged(imgSrc) {
-            this.imgSrc = imgSrc;
+            this.imgSrc = imgSrc; //替换当前的图片地址
             console.log('changed to ', imgSrc);
         }
     },
     sockets: {
         user_image_upload: function user_image_upload(imgSrc) {
+            //监听server.js的user_image_upload频道
             console.log(imgSrc);
             this.userImageChanged(imgSrc);
         }

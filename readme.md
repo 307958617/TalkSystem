@@ -493,32 +493,32 @@
     io.on('connection',function (socket) {
         console.log('a new connected');
         var redisClient = redis.createClient();
-        redisClient.subscribe('chatroom');
-        redisClient.subscribe('user_image_upload');
+        redisClient.subscribe('chatroom');//监听频道为chatroom的事件，即聊天
+        redisClient.subscribe('user_image_upload');//监听频道为user_image_upload的事件，即上传图片
     
-        redisClient.on('message',function (channel,message) {
+        redisClient.on('message',function (channel,message) {//这会根据频道的不同，自动变换频道和需要传递的数据
             // console.log('ss'+ channel + message);
-            socket.emit(channel,message);
+            socket.emit(channel,message);//发布消息，这里的频道可以是chatroom或user_image_upload
         });
     
-        socket.on('typing',function (data) {
+        socket.on('typing',function (data) {//监听typing事件，该事件是表示用户正在输入字符
             // console.log(data + 'is typing');
-            socket.broadcast.emit('sockTyping',data)
+            socket.broadcast.emit('sockTyping',data)//将该事件发布出去，但是自己除外。
         });
     
-        socket.on('stopTyping',function () {
-            socket.broadcast.emit('sockStopTyping')
+        socket.on('stopTyping',function () {//监听stopTyping事件，该事件是表示用户已停止输入字符
+            socket.broadcast.emit('sockStopTyping')//将该事件发布出去，但是自己除外。
         });
         // 用户进入提示
-        socket.on('new user',function (data) {
-            let loginTime = (new Date()).getTime();
-            let newUser = JSON.parse(data);
-            newUser['loginTime'] = loginTime;
-            newUser['name'] = toUnicode(newUser['name']);
-            socket.user = JSON.stringify(newUser);
-            socket.broadcast.emit('sockNewUser',newUser);
-            users[socket.user] = socket.id;
-            upDateUsers();
+        socket.on('new user',function (data) {//监听new user事件，该事件表示用户进入
+            let loginTime = (new Date()).getTime();//记录进入的时间
+            let newUser = JSON.parse(data);//json化数据并赋值给newUser
+            newUser['loginTime'] = loginTime;//将进入时间添加到newUser里面
+            newUser['name'] = toUnicode(newUser['name']);//对newUser里面的'name'字段即汉字转换成Unicode
+            socket.user = JSON.stringify(newUser);//将newUser转换才字符串，存储到socket的user字段里面
+            socket.broadcast.emit('sockNewUser',newUser);//将newUser数据广播出去，表示有人进入了聊天室
+            users[socket.user] = socket.id;//将新加入的user保存到users里面，每个user对应的相应的socket.id值
+            upDateUsers();//将当前登录的所有用户信息广播出去给所有人，包括自己
         });
     
         function toUnicode(s){//只将汉字转换成Unicode，英文不转换
@@ -527,20 +527,225 @@
             });
         }
     
-        function upDateUsers() {
-            io.emit('sockUsers',Object.keys(users))
+        function upDateUsers() {//将当前登录的所有用户信息广播出去给所有人，包括自己
+            io.emit('sockUsers',Object.keys(users))//广播的数据只是键，即只是socket.user(也可以说是newUser)信息
         }
     
         socket.on('disconnect',function (data) {
             if(!socket.user) return;
-            delete users[socket.user];
+            delete users[socket.user];//如果用户退出登录，那么就将users里面删除当前的登录用户
             upDateUsers()
         })
+    
     });
 #### ⑫、需要在app.js里面引入vue-socket.io:
     import VueSocketio from 'vue-socket.io';
-    Vue.use(VueSocketio,'http://talk.app:3000');
+    Vue.use(VueSocketio,'http://talk.app:3000');//注意，这行代码应该放到window.Vue = require('vue');之后
 ### 5、到resources->assets->js->app.js里面注册chat.vue,members.vue:
     Vue.component('chat', require('./components/Chat.vue'));
     Vue.component('members', require('./components/Members.vue'));
 ### 6、执行npm run watch
+## 四、使用croppie上传用户头像：
+### 1、创建一条路由来显示编辑头像的视图：
+    Route::get('/profile', 'ProfileController@edit')->name('edit.profile');
+### 2、执行php artisan make:controller ProfileController 命令，生成ProfileController；
+### 3、给ProfileController添加edit方法：
+    public function edit()
+    {
+        return view('profile');//显示编辑信息也是编辑头像的视图
+    }
+### 4、到views目录下面创建一个profile.blade.php视图文件,内容为：
+    @extends('layouts.app')
+    @section('css')
+        <!-- 引入croppie的css样式，不然图片显示不正常 -->
+        <link href="https://cdn.bootcss.com/croppie/2.4.1/croppie.min.css" rel="stylesheet">
+    @endsection
+    @section('content')
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    暂时不处理
+                </div>
+                <div class="col-md-4">
+                    <div class="box box-warning">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Upload Avatar</h3>
+    
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                            <!-- /.box-tools -->
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- 下面是引入的vue组件UploadAvatar.vue -->
+                        <upload-avatar avatar="{{ Auth::user()->avatar }}"></upload-avatar>
+                        <!-- /.box-body -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    @endsection
+    
+### 5、到resources->assets->js->components里面创建名为UploadAvatar.vue的文件，表示上传图片组件，内容为：
+    <template>
+        <div class="upload-avatar">
+            <div class="box-body" id="croppie"></div><!-- 定义一个容器，用来显示croppie，这是必须的第一步 -->
+            <div class="upload-wapper text-center" style="padding-bottom: 10px">
+                <div class="btn btn-primary btn-sm" @click="modelVisible = true">
+                    <i class="fa fa-camera"> Upload Avatar</i><!-- 添加一个按钮，点击它可以出现上传图片按钮和取消按钮 -->
+                </div>
+    
+                <div class="Model" v-if="modelVisible">
+                    <div class="input-file">
+                        <!-- 下面input的style是将文件选择框隐藏到h4标签的后面，达到美化界面的效果 -->
+                        <input style="opacity: 0;position: absolute;margin-left: 20%" type="file" @change="setUpFileUploader">
+                        <h4 id="fileName">点击这里选择上传文件</h4>
+                    </div>
+    
+                    <div class="btn btn-success btn-sm" @click="uploadFile"><!-- 实现上传图片的功能 -->
+                        <i class="fa fa-upload"> Upload</i>
+                    </div>
+    
+                    <div class="btn btn-danger btn-sm" @click="modelVisible = false"><!-- 实现取消功能 -->
+                        <i class="fa fa-times"> Cancel</i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <script>
+        import Croppie from 'croppie';//引入croppie，在此之前需要安装croppie，即执行：npm install croppie --save
+        export default {
+            props:['avatar'],//将当前登录用户的头像地址传递进来
+            data(){
+                return {
+                    image: null,//定义图片的src地址
+                    croppie: null,
+                    modelVisible: false,//定义model的显示状态，默认是不显示
+                }
+            },
+            mounted() {
+                this.$on('imageUploaded',function (imageData) {//监听上传图片事件，如果上传了新图片则执行下面代码
+                    this.image = imageData;//将当前的图片设置为新上传的图片
+                    this.croppie.destroy();//重新销毁croppie
+                    this.setupCroppie(imageData);//重新初始化croppie
+                });
+    
+                this.image = this.avatar;//初始化时，显示的图片是用户的图片
+                this.setupCroppie();//初始化croppie
+            },
+            methods:{
+                setupCroppie() {//初始化croppie
+                    let el = document.getElementById('croppie');//指定容器
+                    this.croppie = new Croppie(el, {
+    
+                        viewport: { width: 200, height: 200, type: 'circle' },//生成的图片大小及形状设置
+                        boundary: { width: 250, height: 250 },//背景大小设置
+                    });
+                    this.croppie.bind({
+                        url: this.image //croppie里面显示图片地址，默认为传递进来的登录用户的头像地址avatar。
+                    });
+                },
+                setUpFileUploader(e) {//实现选择图片后生产图片功能
+                    let files = e.target.files || e.dataTransfer.files;
+                    if (!files) {
+                        return
+                    }
+                    this.createImage(files[0]);
+    
+                },
+                createImage(file) {//具体实现生成图片
+                    let image = new Image();
+                    let reader = new FileReader();
+                    let vm = this;
+    
+                    reader.onload = (e) => {
+                        vm.image = e.target.result;
+                        vm.$emit('imageUploaded',e.target.result);//发布图片上传消息，将新的图片数据发送出去
+                    };
+    
+                    reader.readAsDataURL(file)
+                },
+                uploadFile() {//实现点击图片上传功能
+                    this.croppie.result({//对图片进行如下处理并返回response
+                        type: 'canvas',
+                        size: 'viewport'
+                    }).then(response => {
+                        this.image = response;//这里的response是经过croppie剪切处理后的图片
+                        axios.post('/avatar-upload',{img: this.image}).then(response => {//将图片传递到larvel后台进行处理
+                            this.modelVisible = false;//成功后隐藏上传按钮
+                            console.log(response)
+                        })
+                    })
+                }
+            }
+        }
+    </script>
+
+### 6、到web.php路由文件添加一条用户处理上传图片的路由：
+    Route::post('/avatar-upload', 'ProfileController@avatarUpload')->name('avatar.upload');
+### 7、给ProfileController 控制器添加avatarUpload方法，具体内容为：
+    public function avatarUpload(Request $request)
+    {
+        $data = $request->input('img');//这里的img就是UploadAvatar.vue通过axios上传来的通过croppie处理后的图片数据
+        list($type,$data) = explode(';',$data);
+        list(, $data) = explode(',', $data);
+        $data = base64_decode($data);//对数据图形数据进行处理后进行base64解码，使之成为图片
+        $imageName = time().'.png';//给图片另外命名
+        $path = storage_path('app/public/images/avatars/');//使之图片的保存地址
+        if(!file_exists($path)){//如果文件夹不存在就创建一个文件夹
+            mkdir($path,0755,true);
+        }
+        file_put_contents($path.$imageName,$data);//将图片存储进指定的文件夹，并命名图片
+
+        $imageUrl = asset('/storage/images/avatars').'/'.$imageName;//给刚刚存储进去的图片指定一个url地址，以便显示时调用
+        $user = User::find(Auth::id());//找到当前用户
+        $user->removeAvatar();//将当前用户原来存储的图片删除掉
+        $user->avatar = $imageUrl;//将数据库的路径也替成新的图片路径
+        $user->save();
+
+        //Redis::publish('user_image_upload',$imageUrl);//将图片地址传递给server.js后台，频道为：user_image_upload
+        return response(['data'=> $user]);
+    }
+## 五、实现上传图像后无刷新显示：
+### 1、给ProfileController的avatarUpload方法添加如下代码：
+    Redis::publish('user_image_upload',$imageUrl);//将图片地址传递给server.js后台，频道为：user_image_upload
+### 2、到server.js后台添加如下代码：
+    redisClient.subscribe('user_image_upload');//监听频道为user_image_upload的事件
+### 3、创建显示用户头像的UserImage.vue组件，内容为：
+    <template>
+        <!-- 需要注意的是，这里的src不能是props直接传递的src，因为这个值是需要根据socket监听图片上传事件而变化的 -->
+        <img :src="imgSrc" :class="imgClass" :alt="alt">
+    </template>
+    
+    <script>
+        export default {
+            props:['src', 'imgClass', 'alt'],
+            created() {
+                this.imgSrc = this.src;//初始化的地址为传递进来的地址
+            },
+            data() {
+                return {
+                    'imgSrc': '',
+                }
+            },
+            methods:{
+                userImageChanged(imgSrc) {
+                    this.imgSrc = imgSrc;//替换当前的图片地址
+                    console.log('changed to ',imgSrc)
+                }
+            },
+            sockets:{
+                user_image_upload(imgSrc) {//监听server.js的user_image_upload频道
+                    console.log(imgSrc);
+                    this.userImageChanged(imgSrc);
+                }
+            }
+        }
+    </script>
+### 4、到图片相应的地方引用UserImage.vue组件即可：
+    <user-image src="{{ Auth::user()->avatar }}" class="user-image" alt="User Image"></user-image>
+### 5、当然，要使之生效必须执行：npm run dev 或 npm run watch
